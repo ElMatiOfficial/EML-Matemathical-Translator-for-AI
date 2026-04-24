@@ -107,20 +107,38 @@ eml render "eml(1, eml(eml(1, x), 1))" --format tree
 
 Every builtin identity is numerically verified at import time against a
 reference implementation. The three identities explicitly stated in the
-paper are marked with the citation; the rest are derived from those by
-composition and re-verified here.
+main paper are marked with the citation; the rest are ported from the
+paper's reference implementation
+([SymbolicRegressionPackage](https://github.com/VA00/SymbolicRegressionPackage),
+`EML_toolkit/EmL_compiler/eml_compiler_v4.py`) and re-verified here.
 
-| Name       | EML expression                                           | K (RPN length) | Source |
-|------------|----------------------------------------------------------|----------------|--------|
-| `exp(x)`   | `eml(x, 1)`                                              | 3              | Odrzywołek (2026) |
-| `e`        | `eml(1, 1)`                                              | 3              | Odrzywołek (2026) |
-| `ln(x)`    | `eml(1, eml(eml(1, x), 1))`                              | 7              | Odrzywołek (2026) |
-| `0`        | `eml(1, eml(eml(1, 1), 1))`                              | 7              | derived (= ln 1) |
-| `x - y`    | `eml(eml(1, eml(eml(1, x), 1)), eml(y, 1))`              | 11             | derived |
-| `1 - y`    | `eml(eml(1, eml(eml(1, 1), 1)), eml(y, 1))`              | 11             | derived |
-| `x - 1`    | `eml(eml(1, eml(eml(1, x), 1)), eml(1, 1))`              | 11             | derived |
+| Name       | K (RPN length) | Source |
+|------------|----------------|--------|
+| `exp(x)`   | 3              | Odrzywołek (2026), main paper |
+| `ln(x)`    | 7              | Odrzywołek (2026), main paper |
+| `e`        | 3              | Odrzywołek (2026), main paper |
+| `0`        | 7              | derived (= ln 1) |
+| `x - y`    | 11             | derived |
+| `1 - y`, `x - 1` | 11       | derived (compact specialisations) |
+| `-x`       | 17             | SymbolicRegressionPackage |
+| `x + y`    | 27             | SymbolicRegressionPackage |
+| `1/x`      | 25             | SymbolicRegressionPackage |
+| `x * y`    | **41**         | SymbolicRegressionPackage (matches paper's stated K for multiplication) |
+| `x / y`    | 65             | SymbolicRegressionPackage |
+| `x ^ y`    | 49             | SymbolicRegressionPackage |
+| `sqrt(x)`  | 99             | derived from `pow` |
+| `2`        | 27             | SymbolicRegressionPackage |
+| `I`        | 115            | SymbolicRegressionPackage (sign-corrected, see identities.py) |
+| `π`        | **193**        | SymbolicRegressionPackage (matches paper's stated K for π) |
 
-You can register more — see [**Extending the library**](#extending-the-library) below.
+All trigonometric and hyperbolic functions (`sin`, `cos`, `tan`, `sinh`,
+`cosh`, `tanh`, and their inverses) translate via `sympy`'s `rewrite(exp)`
+chain, landing in the same `exp`/`log`/`pow`/`I` primitives above. No
+separate identity registration is required — the forward compiler handles
+them automatically.
+
+You can register additional identities — see
+[**Extending the library**](#extending-the-library) below.
 
 ### Modules
 
@@ -140,9 +158,10 @@ You can register more — see [**Extending the library**](#extending-the-library
 
 ## Extending the library
 
-The paper's full identity table for multiplication, division, and the
-trigonometric/hyperbolic families lives in the supplementary material. This
-library gives you two complementary ways to add them yourself.
+The identities above cover the full paper chain (exp, log, arithmetic,
+powers, trig via rewrite). For new primitives — special functions, custom
+activations, piecewise definitions — this library gives you two
+complementary ways to add them.
 
 ### 1. Register a closed-form decomposition
 

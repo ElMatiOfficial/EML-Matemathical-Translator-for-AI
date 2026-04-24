@@ -41,14 +41,9 @@ def test_to_eml_subtraction_forms(src, vars_, expected):
 
 
 def test_to_eml_unknown_function_errors():
+    """A genuinely unknown atom (e.g. Abs) cannot be rewritten to exp/log."""
     with pytest.raises(TranslationError):
-        to_eml("sin(x)")
-
-
-def test_to_eml_unsupported_addition_errors():
-    # genuine addition (not subtraction) has no registered identity
-    with pytest.raises(TranslationError):
-        to_eml("x + y")
+        to_eml("Abs(x)")
 
 
 # -- inverse: EML -> math ------------------------------------------------
