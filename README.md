@@ -1,5 +1,10 @@
 # EML Translator
 
+[![CI](https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/eml-translator.svg)](https://pypi.org/project/eml-translator/)
+[![Python versions](https://img.shields.io/pypi/pyversions/eml-translator.svg)](https://pypi.org/project/eml-translator/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 A Python library that translates between standard mathematical expressions and
 **EML** (Exp-Minus-Log) trees — the universal reduction primitive for
 elementary mathematics introduced by Odrzywołek (2026).
@@ -336,14 +341,14 @@ A [CITATION.cff](CITATION.cff) file is also included for automatic tooling.
 
 ## Project status
 
-**Ready for research use on `pip install .` from source.** 116 tests
-pass; the install verifies the paper's Kolmogorov-length claims for
-multiplication (K = 41) and π (K = 193) exactly, which is strong
-evidence that the identity chain is faithful to the paper.
+**Ready for research use.** CI runs the full 116-test suite on
+Ubuntu / macOS / Windows across Python 3.9–3.12 on every push, and
+confirms the paper's Kolmogorov-length claims for multiplication
+(K = 41) and π (K = 193) exactly — strong evidence the identity chain is
+faithful to the paper.
 
 Known limits:
 
-- **Not yet on PyPI** — install from source (see [Installation](#installation)).
 - **Deep trees accumulate floating-point noise** — `sin(x)` evaluates at
   K ≈ 671 through complex exponentials, so the real-part error on a
   tight grid is typically 10⁻⁸ to 10⁻⁹, not machine epsilon. For
@@ -353,7 +358,49 @@ Known limits:
   `rewrite(exp)` cannot reduce to Add/Mul/Pow/exp/log (e.g. `Abs`,
   `Gamma`, `BesselJ`, piecewise) raises `TranslationError`. Register
   your own identity or open an issue.
-- **No CI yet** — tests run locally only.
+
+---
+
+## Releasing to PyPI
+
+Releases are automated via GitHub Actions using PyPI's
+[Trusted Publisher (OIDC) flow](https://docs.pypi.org/trusted-publishers/) —
+no API tokens are stored in this repo. One-time setup, then tag to release.
+
+### One-time setup (maintainer only)
+
+1. Create an account at <https://pypi.org> and enable 2FA.
+2. Go to **Your projects → Publishing → Add a pending publisher** and fill in:
+
+   | Field              | Value                                      |
+   |--------------------|--------------------------------------------|
+   | PyPI project name  | `eml-translator`                           |
+   | Owner              | `ElMatiOfficial`                           |
+   | Repository name    | `EML-Matemathical-Translator-for-AI`       |
+   | Workflow name      | `publish.yml`                              |
+   | Environment name   | `pypi`                                     |
+
+3. In this repository, go to **Settings → Environments → New environment**
+   and create one named `pypi`. (This is optional but lets you gate
+   deploys behind an approval.)
+
+### Every release
+
+```bash
+# 1. Bump the version in pyproject.toml (e.g. 0.1.0 -> 0.1.1)
+# 2. Commit and push the bump
+git commit -am "Release v0.1.1"
+git push
+
+# 3. Tag and push the tag -- the publish workflow handles the rest
+git tag v0.1.1
+git push origin v0.1.1
+```
+
+The workflow at
+[`.github/workflows/publish.yml`](.github/workflows/publish.yml) will
+build an sdist + wheel and upload them to PyPI. The PyPI badge above
+will reflect the new version within a minute.
 
 ## Contributing
 
@@ -368,5 +415,3 @@ right now are:
 - **Alternative EML variants** — the paper also identifies
   `edl(x, y) = exp(x)/ln(y)` and `ln(x) − exp(y)` as sufficient operators.
   A second backend for those would be a great addition.
-- **A CI workflow** — `.github/workflows/test.yml` running `pytest` on
-  Linux/macOS/Windows would give the project a working-build badge.
