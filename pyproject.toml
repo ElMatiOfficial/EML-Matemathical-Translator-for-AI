@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eml-translator"
+version = "0.1.0"
+description = "A translator library between standard mathematical expressions and EML (Exp-Minus-Log), the universal primitive for elementary mathematics."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [
+    { name = "ElMatiOfficial" },
+]
+keywords = [
+    "mathematics",
+    "symbolic-regression",
+    "eml",
+    "exp-minus-log",
+    "elementary-functions",
+    "ai",
+    "llm",
+    "math-translation",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "sympy>=1.12",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[project.scripts]
+eml = "eml.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI"
+Repository = "https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI"
+Issues = "https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI/issues"
+Paper = "https://arxiv.org/abs/2603.21852"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

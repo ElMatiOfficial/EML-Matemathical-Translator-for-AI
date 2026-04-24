@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite both the software itself and the original EML paper."
+title: "EML Translator: A library for translating between standard mathematics and EML"
+authors:
+  - alias: ElMatiOfficial
+repository-code: "https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI"
+license: MIT
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Odrzywolek"
+      given-names: "Andrzej"
+  title: "All elementary functions from a single operator"
+  year: 2026
+  url: "https://arxiv.org/abs/2603.21852"
+  identifiers:
+    - type: other
+      value: "arXiv:2603.21852"
+      description: "arXiv preprint"
