@@ -21,6 +21,30 @@ by exhaustive symbolic search.
 
 ---
 
+## Credits & related work
+
+The concrete identity chain shipped in this library (`neg`, `add`, `mul`,
+`div`, `inv`, `pow`, `sqrt`, `two`, `I`, `π`, and the integer/rational
+constructors) is a faithful port of the paper's own reference
+implementation:
+
+- **[VA00/SymbolicRegressionPackage](https://github.com/VA00/SymbolicRegressionPackage)**
+  by Andrzej Odrzywołek — the Wolfram Mathematica + Python + Rust + CUDA
+  toolkit described in the paper. The file
+  [`EML_toolkit/EmL_compiler/eml_compiler_v4.py`](https://github.com/VA00/SymbolicRegressionPackage/blob/master/EML_toolkit/EmL_compiler/eml_compiler_v4.py)
+  was the direct source for the arithmetic chain; its correctness is
+  verified in the paper's symbolic-simplification notebooks.
+
+This repository is **not a fork** — it is an independent Python package
+with a different public API (AST + verified identity registry + CLI, all
+as importable modules) aimed at Python-first AI workflows. For the
+original Mathematica notebooks, brute-force search tooling, CUDA kernels,
+and the reproducibility archive, please go to the upstream repository.
+
+Reproducibility archive (Zenodo): <https://doi.org/10.5281/zenodo.19183008>
+
+---
+
 ## Why EML for AI?
 
 An LLM or a symbolic-regression model has to choose, at every node, among a
@@ -36,13 +60,61 @@ between the literal `1`, a variable, or `eml(·, ·)`. This:
 
 ---
 
-## Install
+## Installation
+
+### Prerequisites
+
+- **Python 3.9 or newer** — check with `python --version`. If you are on
+  Windows and `python` is not on your `PATH`, install it from
+  <https://www.python.org/downloads/> and tick "Add Python to PATH".
+- **pip** — bundled with Python; upgrade with `python -m pip install --upgrade pip`.
+- **git** — only needed if you are cloning from GitHub.
+
+The only runtime dependency is [`sympy`](https://www.sympy.org/); `pip`
+will install it for you.
+
+### Step-by-step
 
 ```bash
-pip install -e .
+# 1. Get the source
+git clone https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI.git
+cd EML-Matemathical-Translator-for-AI
+
+# 2. (Recommended) create and activate an isolated virtual environment
+python -m venv .venv
+#   Linux / macOS:
+source .venv/bin/activate
+#   Windows (PowerShell):
+.\.venv\Scripts\Activate.ps1
+#   Windows (cmd):
+.\.venv\Scripts\activate.bat
+
+# 3. Install the package
+pip install .
+
+# 4. Verify it works
+eml translate "exp(x) - 1"
+eml identities | head
 ```
 
-Requires Python 3.9+ and [`sympy`](https://www.sympy.org/).
+If step 4 prints an EML tree, you are good to go. The `eml` command is
+the CLI; in Python, `import eml` gives you the full API.
+
+### For contributors / editable installs
+
+If you plan to modify the source, install it in editable mode with the
+test dependencies:
+
+```bash
+pip install -e '.[dev]'
+python -m pytest tests/ -q     # should end with "116 passed"
+```
+
+### Uninstall
+
+```bash
+pip uninstall eml-translator
+```
 
 ---
 
@@ -211,11 +283,24 @@ require the heuristic methods described in the paper.
 ## Numeric domain
 
 The evaluator uses the principal branch of the complex logarithm, matching
-the paper. Real-valued inputs on the positive axis take the fast real path;
-everything else automatically falls through to `cmath`. Endpoints of the
-domain (e.g. `ln(0) = -∞`) are not representable over the ground constant
-`1` alone and are skipped during verification rather than silently producing
-garbage.
+the paper. Real-valued inputs on the positive axis take the fast real
+path; negative or complex inputs automatically fall through to `cmath`.
+
+The paper's `neg(z) = sub(0, z)` chain (and anything built on top of it —
+`add`, `mul`, `div`, `pow`, the trig/hyperbolic rewrites) evaluates
+`log(0)` as an intermediate step. Python's built-in `math.log(0)` raises,
+so this evaluator implements extended-real conventions for exactly those
+points:
+
+- `exp(-∞) = 0`, `exp(+∞) = +∞`
+- `log(0)  = -∞`, `log(+∞) = +∞`
+- `log(y)` for negative finite real `y` promotes the whole computation
+  to `cmath` (principal branch)
+- indeterminate forms (e.g. `+∞ − +∞`) return `nan`
+
+This is what makes a tree like the one for `−x` — which evaluates
+`exp(exp(1) − log(0))` as a subexpression — come out to the right real
+value on your laptop.
 
 ---
 
@@ -249,15 +334,39 @@ A [CITATION.cff](CITATION.cff) file is also included for automatic tooling.
 
 [MIT](LICENSE) — free for research, teaching, and commercial use.
 
+## Project status
+
+**Ready for research use on `pip install .` from source.** 116 tests
+pass; the install verifies the paper's Kolmogorov-length claims for
+multiplication (K = 41) and π (K = 193) exactly, which is strong
+evidence that the identity chain is faithful to the paper.
+
+Known limits:
+
+- **Not yet on PyPI** — install from source (see [Installation](#installation)).
+- **Deep trees accumulate floating-point noise** — `sin(x)` evaluates at
+  K ≈ 671 through complex exponentials, so the real-part error on a
+  tight grid is typically 10⁻⁸ to 10⁻⁹, not machine epsilon. For
+  symbolic or high-precision numeric work, use the paper's `mpmath`
+  suite from the [upstream repository](https://github.com/VA00/SymbolicRegressionPackage).
+- **Special functions out of scope** — anything that sympy's
+  `rewrite(exp)` cannot reduce to Add/Mul/Pow/exp/log (e.g. `Abs`,
+  `Gamma`, `BesselJ`, piecewise) raises `TranslationError`. Register
+  your own identity or open an issue.
+- **No CI yet** — tests run locally only.
+
 ## Contributing
 
-Issues and pull requests are welcome. The most valuable contributions right
-now are:
+Issues and pull requests are welcome. The most valuable contributions
+right now are:
 
-- **New verified identities** — especially the paper's supplementary
-  decompositions for `+`, `*`, `/`, `sin`, `cos`, `sqrt`, etc.
-- **Faster search heuristics** — the current exhaustive enumerator works
-  but does not yet prune based on structural symmetries.
-- **Alternative EML variants** — the paper also identifies `edl(x, y) =
-  exp(x)/ln(y)` and `ln(x) - exp(y)` as sufficient operators. A second
-  backend for those would be a great addition.
+- **New verified identities** for special functions (`Abs`, `Gamma`,
+  activation functions, etc.) that sympy cannot rewrite to elementary
+  form. See the `register_identity` example above.
+- **Faster search heuristics** — the current exhaustive enumerator
+  works but does not yet prune based on structural symmetries.
+- **Alternative EML variants** — the paper also identifies
+  `edl(x, y) = exp(x)/ln(y)` and `ln(x) − exp(y)` as sufficient operators.
+  A second backend for those would be a great addition.
+- **A CI workflow** — `.github/workflows/test.yml` running `pytest` on
+  Linux/macOS/Windows would give the project a working-build badge.
