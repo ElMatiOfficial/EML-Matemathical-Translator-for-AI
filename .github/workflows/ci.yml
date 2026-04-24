@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches-ignore:
+      - "gh-readonly-queue/**"
   pull_request:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
