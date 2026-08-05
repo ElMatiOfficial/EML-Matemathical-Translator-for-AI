@@ -1,74 +1,100 @@
 name: Publish to PyPI
 
-# Triggered by pushing a git tag that starts with `v` (e.g. v0.1.0).
-# Uses PyPI's Trusted Publisher (OIDC) flow -- no API tokens needed.
-#
-# One-time PyPI setup (required before the first release can succeed):
-#   1. Create an account at https://pypi.org
-#   2. Go to Your projects -> Publishing -> Add a pending publisher with:
-#        PyPI project name:    eml-translator
-#        Owner:                ElMatiOfficial
-#        Repository name:      EML-Matemathical-Translator-for-AI
-#        Workflow name:        publish.yml
-#        Environment name:     pypi     (optional but recommended)
-#   3. (Optional) In this repo, create an Environment called `pypi`
-#      under Settings -> Environments, so deploys can be gated.
-#
-# After setup, release with:
-#
-#   git tag v0.1.0
-#   git push origin v0.1.0
-
+# Fires when you publish a GitHub Release. Draft releases do NOT trigger this,
+# so you can stage release notes safely and publish when ready.
 on:
-  push:
-    tags:
-      - "v*"
+  release:
+    types: [published]
   workflow_dispatch:
+    inputs:
+      target:
+        description: "Where to publish"
+        required: true
+        default: testpypi
+        type: choice
+        options: [testpypi, pypi]
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    name: Build sdist and wheel
+    name: Build distributions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
 
-      - name: Install build tooling
+      - name: Guard — release tag must match pyproject version
+        # Without this, tagging v0.2.0 while pyproject still says 0.1.0 silently
+        # republishes the old version number and PyPI rejects it as a duplicate.
+        # Fail here instead, before anything is uploaded.
+        if: github.event_name == 'release'
         run: |
-          python -m pip install --upgrade pip
-          pip install build
+          python -m pip install --upgrade pip tomli
+          PROJECT_VERSION=$(python -c "import tomli;print(tomli.load(open('pyproject.toml','rb'))['project']['version'])")
+          TAG="${GITHUB_REF_NAME#v}"
+          echo "pyproject version: $PROJECT_VERSION"
+          echo "release tag:       $TAG"
+          if [ "$PROJECT_VERSION" != "$TAG" ]; then
+            echo "::error::Tag '$TAG' does not match pyproject version '$PROJECT_VERSION'. Bump the version in pyproject.toml, commit, then re-tag."
+            exit 1
+          fi
 
-      - name: Build distributions
-        run: python -m build
+      - name: Build sdist + wheel
+        run: |
+          python -m pip install --upgrade build twine
+          python -m build
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Validate metadata
+        run: twine check --strict dist/*
+
+      - uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
+          if-no-files-found: error
 
-  publish:
-    name: Publish to PyPI (trusted publisher)
+  publish-testpypi:
+    name: Publish to TestPyPI
     needs: build
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi'
     runs-on: ubuntu-latest
-    # This environment name must match the one configured on PyPI.
-    # Delete the `environment:` block if you did not create a PyPI environment.
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/eml-translator
+    permissions:
+      id-token: write   # required for Trusted Publishing (OIDC). No API token needed.
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: build
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
+    runs-on: ubuntu-latest
     environment:
       name: pypi
       url: https://pypi.org/p/eml-translator
     permissions:
-      id-token: write  # required for OIDC trusted publishing
+      id-token: write
     steps:
-      - name: Download dist artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist/
 
-      - name: Publish package distributions to PyPI
+      - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1
+        # No `password:` line on purpose — Trusted Publishing authenticates via
+        # OIDC. There is no long-lived token to leak or rotate.
