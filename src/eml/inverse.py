@@ -8,7 +8,7 @@ and let :mod:`sympy` simplify. Because the rewrite is a pure substitution
 
 from __future__ import annotations
 
-from typing import Mapping, Optional
+from collections.abc import Mapping
 
 import sympy
 
@@ -19,7 +19,7 @@ def from_eml(
     node: Node,
     *,
     simplify: bool = True,
-    symbols: Optional[Mapping[str, sympy.Symbol]] = None,
+    symbols: Mapping[str, sympy.Symbol] | None = None,
 ) -> sympy.Expr:
     """Translate an EML tree into the sympy expression it represents.
 

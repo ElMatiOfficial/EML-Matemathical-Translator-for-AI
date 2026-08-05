@@ -16,15 +16,14 @@ from __future__ import annotations
 
 import itertools
 import math
-from typing import Callable, Iterator, Sequence
+from collections.abc import Iterator, Sequence
+from typing import Callable
 
 from eml.ast import Eml, Node, One, Var
 from eml.eval import evaluate
 
 
-def _enumerate_trees(
-    leaves: list[Node], max_size: int
-) -> Iterator[tuple[int, list[Node]]]:
+def _enumerate_trees(leaves: list[Node], max_size: int) -> Iterator[tuple[int, list[Node]]]:
     """Yield (size, trees-of-that-size) in increasing size order.
 
     ``size`` is the total node count (leaves + internal eml nodes),

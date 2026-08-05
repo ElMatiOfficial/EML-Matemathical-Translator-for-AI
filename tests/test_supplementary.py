@@ -19,8 +19,8 @@ from eml.eval import evaluate
 from eml.identities import IDENTITIES, int_tree, rational_tree
 from eml.printer import to_rpn
 
-
 # -- new unary identities ------------------------------------------------
+
 
 @pytest.mark.parametrize("x", [0.3, 1.7, 2.8])
 def test_neg(x):
@@ -45,6 +45,7 @@ def test_sqrt(x):
 
 # -- new binary identities ----------------------------------------------
 
+
 @pytest.mark.parametrize("x,y", [(1.5, 2.5), (3.0, 4.0), (0.5, 2.0)])
 def test_add(x, y):
     tree = IDENTITIES["add"](Var("x"), Var("y"))
@@ -67,11 +68,12 @@ def test_div(x, y):
 def test_pow(a, b):
     tree = IDENTITIES["pow"](Var("a"), Var("b"))
     got = complex(evaluate(tree, {"a": a, "b": b}))
-    assert got.real == pytest.approx(a ** b)
+    assert got.real == pytest.approx(a**b)
     assert abs(got.imag) < 1e-9
 
 
 # -- constants ----------------------------------------------------------
+
 
 def test_two():
     tree = IDENTITIES["two"]()
@@ -95,6 +97,7 @@ def test_pi():
 
 # -- Kolmogorov-length claims from the paper ----------------------------
 
+
 def test_K_of_mul_is_41():
     """The paper states the Kolmogorov length of multiplication is 41."""
     tree = IDENTITIES["mul"](Var("x"), Var("y"))
@@ -111,6 +114,7 @@ def test_K_of_pi_is_193():
 
 # -- integer and rational builders --------------------------------------
 
+
 @pytest.mark.parametrize("n", [0, 1, 2, 3, 5, 10, -1, -7])
 def test_int_tree(n):
     tree = int_tree(n)
@@ -124,6 +128,7 @@ def test_rational_tree(p, q):
 
 
 # -- forward translator end-to-end --------------------------------------
+
 
 @pytest.mark.parametrize(
     "src, bindings, expected",
@@ -165,6 +170,6 @@ def test_forward_nested_polynomial():
     """Compile a messy polynomial and verify at several points."""
     tree = eml.to_eml("x**3 - 2*x**2 + x - 1")
     for x in [0.5, 1.0, 1.5, 2.0, 3.0]:
-        expected = x ** 3 - 2 * x ** 2 + x - 1
+        expected = x**3 - 2 * x**2 + x - 1
         got = complex(evaluate(tree, {"x": x})).real
         assert got == pytest.approx(expected, rel=1e-9, abs=1e-9)

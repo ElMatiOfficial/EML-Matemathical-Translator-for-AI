@@ -24,7 +24,7 @@ def test_primitive_complex_domain():
 def test_evaluate_tree_with_binding():
     # exp(x) = eml(x, 1)
     t = Eml(Var("x"), One())
-    assert evaluate(t, {"x": 2.0}) == pytest.approx(math.e ** 2)
+    assert evaluate(t, {"x": 2.0}) == pytest.approx(math.e**2)
 
 
 def test_evaluate_missing_binding_raises():

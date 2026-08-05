@@ -7,8 +7,8 @@ from eml.eval import evaluate
 from eml.forward import TranslationError, to_eml
 from eml.inverse import from_eml
 
-
 # -- forward: math -> EML -------------------------------------------------
+
 
 @pytest.mark.parametrize(
     "src, value_at_x3",
@@ -48,6 +48,7 @@ def test_to_eml_unknown_function_errors():
 
 # -- inverse: EML -> math ------------------------------------------------
 
+
 @pytest.mark.parametrize("src", ["exp(x)", "log(x)", "E", "1"])
 def test_roundtrip_to_eml_and_back(src):
     """Forward then inverse should yield an expression numerically equal to the original.
@@ -80,4 +81,4 @@ def test_from_eml_literal_tree():
     got = from_eml(tree)
     # numeric check: exp(2) ~ 7.389
     sym = next(iter(got.free_symbols))
-    assert complex(got.subs(sym, 2.0)).real == pytest.approx(math.e ** 2)
+    assert complex(got.subs(sym, 2.0)).real == pytest.approx(math.e**2)
