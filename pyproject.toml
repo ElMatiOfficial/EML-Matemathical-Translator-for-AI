@@ -57,10 +57,10 @@ dev = [
 eml = "eml.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI"
-Repository = "https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI"
-Issues = "https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI/issues"
-Changelog = "https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/ElMatiOfficial/EML-Mathematical-Translator-for-AI"
+Repository = "https://github.com/ElMatiOfficial/EML-Mathematical-Translator-for-AI"
+Issues = "https://github.com/ElMatiOfficial/EML-Mathematical-Translator-for-AI/issues"
+Changelog = "https://github.com/ElMatiOfficial/EML-Mathematical-Translator-for-AI/blob/main/CHANGELOG.md"
 Paper = "https://arxiv.org/abs/2603.21852"
 
 [tool.setuptools.packages.find]
