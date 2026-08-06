@@ -1,5 +1,10 @@
 # EML Translator
 
+[![CI](https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/eml-translator.svg)](https://pypi.org/project/eml-translator/)
+[![Python versions](https://img.shields.io/pypi/pyversions/eml-translator.svg)](https://pypi.org/project/eml-translator/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 A Python library that translates between standard mathematical expressions and
 **EML** (Exp-Minus-Log) trees — the universal reduction primitive for
 elementary mathematics introduced by Odrzywołek (2026).
@@ -21,6 +26,30 @@ by exhaustive symbolic search.
 
 ---
 
+## Credits & related work
+
+The concrete identity chain shipped in this library (`neg`, `add`, `mul`,
+`div`, `inv`, `pow`, `sqrt`, `two`, `I`, `π`, and the integer/rational
+constructors) is a faithful port of the paper's own reference
+implementation:
+
+- **[VA00/SymbolicRegressionPackage](https://github.com/VA00/SymbolicRegressionPackage)**
+  by Andrzej Odrzywołek — the Wolfram Mathematica + Python + Rust + CUDA
+  toolkit described in the paper. The file
+  [`EML_toolkit/EmL_compiler/eml_compiler_v4.py`](https://github.com/VA00/SymbolicRegressionPackage/blob/master/EML_toolkit/EmL_compiler/eml_compiler_v4.py)
+  was the direct source for the arithmetic chain; its correctness is
+  verified in the paper's symbolic-simplification notebooks.
+
+This repository is **not a fork** — it is an independent Python package
+with a different public API (AST + verified identity registry + CLI, all
+as importable modules) aimed at Python-first AI workflows. For the
+original Mathematica notebooks, brute-force search tooling, CUDA kernels,
+and the reproducibility archive, please go to the upstream repository.
+
+Reproducibility archive (Zenodo): <https://doi.org/10.5281/zenodo.19183008>
+
+---
+
 ## Why EML for AI?
 
 An LLM or a symbolic-regression model has to choose, at every node, among a
@@ -36,13 +65,61 @@ between the literal `1`, a variable, or `eml(·, ·)`. This:
 
 ---
 
-## Install
+## Installation
+
+### Prerequisites
+
+- **Python 3.9 or newer** — check with `python --version`. If you are on
+  Windows and `python` is not on your `PATH`, install it from
+  <https://www.python.org/downloads/> and tick "Add Python to PATH".
+- **pip** — bundled with Python; upgrade with `python -m pip install --upgrade pip`.
+- **git** — only needed if you are cloning from GitHub.
+
+The only runtime dependency is [`sympy`](https://www.sympy.org/); `pip`
+will install it for you.
+
+### Step-by-step
 
 ```bash
-pip install -e .
+# 1. Get the source
+git clone https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI.git
+cd EML-Matemathical-Translator-for-AI
+
+# 2. (Recommended) create and activate an isolated virtual environment
+python -m venv .venv
+#   Linux / macOS:
+source .venv/bin/activate
+#   Windows (PowerShell):
+.\.venv\Scripts\Activate.ps1
+#   Windows (cmd):
+.\.venv\Scripts\activate.bat
+
+# 3. Install the package
+pip install .
+
+# 4. Verify it works
+eml translate "exp(x) - 1"
+eml identities | head
 ```
 
-Requires Python 3.9+ and [`sympy`](https://www.sympy.org/).
+If step 4 prints an EML tree, you are good to go. The `eml` command is
+the CLI; in Python, `import eml` gives you the full API.
+
+### For contributors / editable installs
+
+If you plan to modify the source, install it in editable mode with the
+test dependencies:
+
+```bash
+pip install -e '.[dev]'
+python -m pytest tests/ -q     # should end with "116 passed"
+```
+
+### Uninstall
+
+```bash
+pip uninstall eml-translator
+```
 
 ---
 
@@ -107,20 +184,38 @@ eml render "eml(1, eml(eml(1, x), 1))" --format tree
 
 Every builtin identity is numerically verified at import time against a
 reference implementation. The three identities explicitly stated in the
-paper are marked with the citation; the rest are derived from those by
-composition and re-verified here.
+main paper are marked with the citation; the rest are ported from the
+paper's reference implementation
+([SymbolicRegressionPackage](https://github.com/VA00/SymbolicRegressionPackage),
+`EML_toolkit/EmL_compiler/eml_compiler_v4.py`) and re-verified here.
 
-| Name       | EML expression                                           | K (RPN length) | Source |
-|------------|----------------------------------------------------------|----------------|--------|
-| `exp(x)`   | `eml(x, 1)`                                              | 3              | Odrzywołek (2026) |
-| `e`        | `eml(1, 1)`                                              | 3              | Odrzywołek (2026) |
-| `ln(x)`    | `eml(1, eml(eml(1, x), 1))`                              | 7              | Odrzywołek (2026) |
-| `0`        | `eml(1, eml(eml(1, 1), 1))`                              | 7              | derived (= ln 1) |
-| `x - y`    | `eml(eml(1, eml(eml(1, x), 1)), eml(y, 1))`              | 11             | derived |
-| `1 - y`    | `eml(eml(1, eml(eml(1, 1), 1)), eml(y, 1))`              | 11             | derived |
-| `x - 1`    | `eml(eml(1, eml(eml(1, x), 1)), eml(1, 1))`              | 11             | derived |
+| Name       | K (RPN length) | Source |
+|------------|----------------|--------|
+| `exp(x)`   | 3              | Odrzywołek (2026), main paper |
+| `ln(x)`    | 7              | Odrzywołek (2026), main paper |
+| `e`        | 3              | Odrzywołek (2026), main paper |
+| `0`        | 7              | derived (= ln 1) |
+| `x - y`    | 11             | derived |
+| `1 - y`, `x - 1` | 11       | derived (compact specialisations) |
+| `-x`       | 17             | SymbolicRegressionPackage |
+| `x + y`    | 27             | SymbolicRegressionPackage |
+| `1/x`      | 25             | SymbolicRegressionPackage |
+| `x * y`    | **41**         | SymbolicRegressionPackage (matches paper's stated K for multiplication) |
+| `x / y`    | 65             | SymbolicRegressionPackage |
+| `x ^ y`    | 49             | SymbolicRegressionPackage |
+| `sqrt(x)`  | 99             | derived from `pow` |
+| `2`        | 27             | SymbolicRegressionPackage |
+| `I`        | 115            | SymbolicRegressionPackage (sign-corrected, see identities.py) |
+| `π`        | **193**        | SymbolicRegressionPackage (matches paper's stated K for π) |
 
-You can register more — see [**Extending the library**](#extending-the-library) below.
+All trigonometric and hyperbolic functions (`sin`, `cos`, `tan`, `sinh`,
+`cosh`, `tanh`, and their inverses) translate via `sympy`'s `rewrite(exp)`
+chain, landing in the same `exp`/`log`/`pow`/`I` primitives above. No
+separate identity registration is required — the forward compiler handles
+them automatically.
+
+You can register additional identities — see
+[**Extending the library**](#extending-the-library) below.
 
 ### Modules
 
@@ -140,9 +235,10 @@ You can register more — see [**Extending the library**](#extending-the-library
 
 ## Extending the library
 
-The paper's full identity table for multiplication, division, and the
-trigonometric/hyperbolic families lives in the supplementary material. This
-library gives you two complementary ways to add them yourself.
+The identities above cover the full paper chain (exp, log, arithmetic,
+powers, trig via rewrite). For new primitives — special functions, custom
+activations, piecewise definitions — this library gives you two
+complementary ways to add them.
 
 ### 1. Register a closed-form decomposition
 
@@ -192,11 +288,24 @@ require the heuristic methods described in the paper.
 ## Numeric domain
 
 The evaluator uses the principal branch of the complex logarithm, matching
-the paper. Real-valued inputs on the positive axis take the fast real path;
-everything else automatically falls through to `cmath`. Endpoints of the
-domain (e.g. `ln(0) = -∞`) are not representable over the ground constant
-`1` alone and are skipped during verification rather than silently producing
-garbage.
+the paper. Real-valued inputs on the positive axis take the fast real
+path; negative or complex inputs automatically fall through to `cmath`.
+
+The paper's `neg(z) = sub(0, z)` chain (and anything built on top of it —
+`add`, `mul`, `div`, `pow`, the trig/hyperbolic rewrites) evaluates
+`log(0)` as an intermediate step. Python's built-in `math.log(0)` raises,
+so this evaluator implements extended-real conventions for exactly those
+points:
+
+- `exp(-∞) = 0`, `exp(+∞) = +∞`
+- `log(0)  = -∞`, `log(+∞) = +∞`
+- `log(y)` for negative finite real `y` promotes the whole computation
+  to `cmath` (principal branch)
+- indeterminate forms (e.g. `+∞ − +∞`) return `nan`
+
+This is what makes a tree like the one for `−x` — which evaluates
+`exp(exp(1) − log(0))` as a subexpression — come out to the right real
+value on your laptop.
 
 ---
 
@@ -230,15 +339,79 @@ A [CITATION.cff](CITATION.cff) file is also included for automatic tooling.
 
 [MIT](LICENSE) — free for research, teaching, and commercial use.
 
+## Project status
+
+**Ready for research use.** CI runs the full 116-test suite on
+Ubuntu / macOS / Windows across Python 3.9–3.12 on every push, and
+confirms the paper's Kolmogorov-length claims for multiplication
+(K = 41) and π (K = 193) exactly — strong evidence the identity chain is
+faithful to the paper.
+
+Known limits:
+
+- **Deep trees accumulate floating-point noise** — `sin(x)` evaluates at
+  K ≈ 671 through complex exponentials, so the real-part error on a
+  tight grid is typically 10⁻⁸ to 10⁻⁹, not machine epsilon. For
+  symbolic or high-precision numeric work, use the paper's `mpmath`
+  suite from the [upstream repository](https://github.com/VA00/SymbolicRegressionPackage).
+- **Special functions out of scope** — anything that sympy's
+  `rewrite(exp)` cannot reduce to Add/Mul/Pow/exp/log (e.g. `Abs`,
+  `Gamma`, `BesselJ`, piecewise) raises `TranslationError`. Register
+  your own identity or open an issue.
+
+---
+
+## Releasing to PyPI
+
+Releases are automated via GitHub Actions using PyPI's
+[Trusted Publisher (OIDC) flow](https://docs.pypi.org/trusted-publishers/) —
+no API tokens are stored in this repo. One-time setup, then tag to release.
+
+### One-time setup (maintainer only)
+
+1. Create an account at <https://pypi.org> and enable 2FA.
+2. Go to **Your projects → Publishing → Add a pending publisher** and fill in:
+
+   | Field              | Value                                      |
+   |--------------------|--------------------------------------------|
+   | PyPI project name  | `eml-translator`                           |
+   | Owner              | `ElMatiOfficial`                           |
+   | Repository name    | `EML-Matemathical-Translator-for-AI`       |
+   | Workflow name      | `publish.yml`                              |
+   | Environment name   | `pypi`                                     |
+
+3. In this repository, go to **Settings → Environments → New environment**
+   and create one named `pypi`. (This is optional but lets you gate
+   deploys behind an approval.)
+
+### Every release
+
+```bash
+# 1. Bump the version in pyproject.toml (e.g. 0.1.0 -> 0.1.1)
+# 2. Commit and push the bump
+git commit -am "Release v0.1.1"
+git push
+
+# 3. Tag and push the tag -- the publish workflow handles the rest
+git tag v0.1.1
+git push origin v0.1.1
+```
+
+The workflow at
+[`.github/workflows/publish.yml`](.github/workflows/publish.yml) will
+build an sdist + wheel and upload them to PyPI. The PyPI badge above
+will reflect the new version within a minute.
+
 ## Contributing
 
-Issues and pull requests are welcome. The most valuable contributions right
-now are:
+Issues and pull requests are welcome. The most valuable contributions
+right now are:
 
-- **New verified identities** — especially the paper's supplementary
-  decompositions for `+`, `*`, `/`, `sin`, `cos`, `sqrt`, etc.
-- **Faster search heuristics** — the current exhaustive enumerator works
-  but does not yet prune based on structural symmetries.
-- **Alternative EML variants** — the paper also identifies `edl(x, y) =
-  exp(x)/ln(y)` and `ln(x) - exp(y)` as sufficient operators. A second
-  backend for those would be a great addition.
+- **New verified identities** for special functions (`Abs`, `Gamma`,
+  activation functions, etc.) that sympy cannot rewrite to elementary
+  form. See the `register_identity` example above.
+- **Faster search heuristics** — the current exhaustive enumerator
+  works but does not yet prune based on structural symmetries.
+- **Alternative EML variants** — the paper also identifies
+  `edl(x, y) = exp(x)/ln(y)` and `ln(x) − exp(y)` as sufficient operators.
+  A second backend for those would be a great addition.
