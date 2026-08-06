@@ -1,6 +1,6 @@
 # EML Translator
 
-[![CI](https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI/actions/workflows/ci.yml)
+[![CI](https://github.com/ElMatiOfficial/EML-Mathematical-Translator-for-AI/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ElMatiOfficial/EML-Mathematical-Translator-for-AI/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/eml-translator.svg)](https://pypi.org/project/eml-translator/)
 [![Python versions](https://img.shields.io/pypi/pyversions/eml-translator.svg)](https://pypi.org/project/eml-translator/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -82,8 +82,8 @@ will install it for you.
 
 ```bash
 # 1. Get the source
-git clone https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI.git
-cd EML-Matemathical-Translator-for-AI
+git clone https://github.com/ElMatiOfficial/EML-Mathematical-Translator-for-AI.git
+cd EML-Mathematical-Translator-for-AI
 
 # 2. (Recommended) create and activate an isolated virtual environment
 python -m venv .venv
@@ -326,7 +326,7 @@ the original paper:
 @software{eml_translator,
   title  = {EML Translator: A library for translating between standard mathematics and EML},
   author = {ElMatiOfficial and contributors},
-  url    = {https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI},
+  url    = {https://github.com/ElMatiOfficial/EML-Mathematical-Translator-for-AI},
   year   = {2026},
 }
 ```
@@ -376,7 +376,7 @@ no API tokens are stored in this repo. One-time setup, then tag to release.
    |--------------------|--------------------------------------------|
    | PyPI project name  | `eml-translator`                           |
    | Owner              | `ElMatiOfficial`                           |
-   | Repository name    | `EML-Matemathical-Translator-for-AI`       |
+   | Repository name    | `EML-Mathematical-Translator-for-AI`       |
    | Workflow name      | `publish.yml`                              |
    | Environment name   | `pypi`                                     |
 

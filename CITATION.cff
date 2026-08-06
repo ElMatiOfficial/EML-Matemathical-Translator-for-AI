@@ -3,7 +3,7 @@ message: "If you use this software, please cite both the software itself and the
 title: "EML Translator: A library for translating between standard mathematics and EML"
 authors:
   - alias: ElMatiOfficial
-repository-code: "https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI"
+repository-code: "https://github.com/ElMatiOfficial/EML-Mathematical-Translator-for-AI"
 license: MIT
 preferred-citation:
   type: article
