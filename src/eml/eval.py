@@ -29,7 +29,8 @@ from __future__ import annotations
 
 import cmath
 import math
-from typing import Mapping, Union
+from collections.abc import Mapping
+from typing import Union
 
 from eml.ast import Eml, Node, One, Var
 

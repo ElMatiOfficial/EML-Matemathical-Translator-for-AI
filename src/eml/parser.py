@@ -16,7 +16,7 @@ error; numbers like ``2`` must be written as EML trees over 1.
 from __future__ import annotations
 
 import re
-from typing import Iterator, List, Tuple
+from collections.abc import Iterator
 
 from eml.ast import Eml, Node, One, Var
 
@@ -27,7 +27,7 @@ class ParseError(ValueError):
     """Raised when EML source text cannot be parsed."""
 
 
-def _tokenize(src: str) -> List[Tuple[str, str]]:
+def _tokenize(src: str) -> list[tuple[str, str]]:
     """Return a list of (kind, text) tokens. Kind is one of
     {'eml', 'one', 'var', 'lparen', 'rparen', 'comma'}.
     """
@@ -61,8 +61,8 @@ def parse(src: str) -> Node:
 
 
 def _parse_expr(
-    it: Iterator[Tuple[str, str]], peek: Tuple[str, str] | None
-) -> tuple[Node, Tuple[str, str] | None]:
+    it: Iterator[tuple[str, str]], peek: tuple[str, str] | None
+) -> tuple[Node, tuple[str, str] | None]:
     if peek is None:
         raise ParseError("Unexpected end of input.")
     kind, text = peek
@@ -101,9 +101,7 @@ def parse_rpn(src: str) -> Node:
         else:
             raise ParseError(f"Unrecognised RPN token: {tok!r}")
     if len(stack) != 1:
-        raise ParseError(
-            f"RPN did not reduce to a single expression (stack size {len(stack)})."
-        )
+        raise ParseError(f"RPN did not reduce to a single expression (stack size {len(stack)}).")
     return stack[0]
 
 

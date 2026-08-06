@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import argparse
 import sys
-from typing import Sequence
+from collections.abc import Sequence
 
 from eml import (
     IDENTITIES,
@@ -166,9 +166,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     t = sub.add_parser("translate", help="standard math -> EML tree")
     t.add_argument("expr", help="math expression, e.g. 'exp(x) - 1'")
-    t.add_argument(
-        "--format", choices=["text", "rpn", "latex", "tree"], default="text"
-    )
+    t.add_argument("--format", choices=["text", "rpn", "latex", "tree"], default="text")
     t.set_defaults(func=_cmd_translate)
 
     r = sub.add_parser("reverse", help="EML tree -> standard math")
@@ -181,8 +179,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     v = sub.add_parser("verify", help="check an EML tree equals a math expression")
     v.add_argument("eml_expr")
-    v.add_argument("--as", dest="equivalent_to", required=True,
-                   help="the math expression to check against")
+    v.add_argument(
+        "--as", dest="equivalent_to", required=True, help="the math expression to check against"
+    )
     v.set_defaults(func=_cmd_verify)
 
     s = sub.add_parser("search", help="exhaustive search for a new EML identity")
@@ -191,17 +190,13 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--max-size", type=int, default=7)
     s.add_argument("--tol", type=float, default=1e-8)
     s.add_argument("--max-results", type=int, default=3)
-    s.add_argument(
-        "--format", choices=["text", "rpn", "latex", "tree"], default="text"
-    )
+    s.add_argument("--format", choices=["text", "rpn", "latex", "tree"], default="text")
     s.add_argument("-v", "--verbose", action="store_true")
     s.set_defaults(func=_cmd_search)
 
     rn = sub.add_parser("render", help="pretty-print an EML tree")
     rn.add_argument("eml_expr")
-    rn.add_argument(
-        "--format", choices=["text", "rpn", "latex", "tree"], default="tree"
-    )
+    rn.add_argument("--format", choices=["text", "rpn", "latex", "tree"], default="tree")
     rn.set_defaults(func=_cmd_render)
 
     ev = sub.add_parser("eval", help="numerically evaluate an EML tree")

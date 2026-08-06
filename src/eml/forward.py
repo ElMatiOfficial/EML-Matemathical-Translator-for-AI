@@ -34,7 +34,7 @@ from typing import Union
 
 import sympy
 
-from eml.ast import Eml, Node, One, Var
+from eml.ast import Node, Var
 from eml.identities import IDENTITIES, int_tree, rational_tree
 
 ExprLike = Union[str, "sympy.Expr"]
@@ -112,9 +112,7 @@ def _compile(expr: sympy.Expr) -> Node:
             return rational_tree(int(r.p), int(r.q))
         if isinstance(expr, sympy.Symbol):
             return Var(expr.name)
-        raise TranslationError(
-            f"Unsupported atom {expr!r} of type {type(expr).__name__}."
-        )
+        raise TranslationError(f"Unsupported atom {expr!r} of type {type(expr).__name__}.")
 
     func = getattr(expr, "func", None)
 

@@ -41,8 +41,8 @@ class Var:
 class Eml:
     """An internal EML node: eml(left, right) = exp(left) - ln(right)."""
 
-    left: "Node"
-    right: "Node"
+    left: Node
+    right: Node
 
     def __repr__(self) -> str:
         return f"eml({self.left!r}, {self.right!r})"

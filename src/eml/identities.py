@@ -23,7 +23,8 @@ from __future__ import annotations
 
 import cmath
 import math
-from typing import Callable, Mapping
+from collections.abc import Mapping
+from typing import Callable
 
 from eml.ast import Eml, Node, One, Var
 from eml.eval import evaluate
@@ -174,7 +175,7 @@ _REFERENCES: dict[str, Callable[..., complex]] = {
     "inv": lambda z: 1 / z,
     "mul": lambda a, b: a * b,
     "div": lambda a, b: a / b,
-    "pow": lambda a, b: a ** b,
+    "pow": lambda a, b: a**b,
     "two": lambda: 2,
     "sqrt": cmath.sqrt,
     "I": lambda: 1j,
@@ -188,7 +189,12 @@ _REFERENCES: dict[str, Callable[..., complex]] = {
 # tolerance must absorb ~1e-12 cancellation error per cascaded operation, so
 # the reasonable bound is a relative 1e-9.
 _SAMPLES: list[complex] = [
-    0.5, 1.0, 1.5, 2.0, 3.7, 10.0,
+    0.5,
+    1.0,
+    1.5,
+    2.0,
+    3.7,
+    10.0,
     complex(1.2, 0.3),
     complex(2.0, -0.5),
 ]

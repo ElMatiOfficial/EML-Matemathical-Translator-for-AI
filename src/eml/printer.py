@@ -59,13 +59,7 @@ def to_latex(node: Node) -> str:
     if isinstance(node, Var):
         return node.name
     if isinstance(node, Eml):
-        return (
-            r"\operatorname{eml}("
-            + to_latex(node.left)
-            + r",\, "
-            + to_latex(node.right)
-            + ")"
-        )
+        return r"\operatorname{eml}(" + to_latex(node.left) + r",\, " + to_latex(node.right) + ")"
     raise TypeError(f"Unknown node type: {type(node).__name__}")
 
 
@@ -88,9 +82,7 @@ def to_tree(node: Node, indent: str = "  ") -> str:
     return "\n".join(lines)
 
 
-def _collect_tree(
-    node: Node, depth: int, role: str | None, lines: list[str], indent: str
-) -> None:
+def _collect_tree(node: Node, depth: int, role: str | None, lines: list[str], indent: str) -> None:
     pad = indent * depth
     tag = f"{role}: " if role else ""
     if isinstance(node, One):

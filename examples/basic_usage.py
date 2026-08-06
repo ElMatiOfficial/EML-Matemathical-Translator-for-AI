@@ -83,6 +83,7 @@ def demo_custom_identity() -> None:
     print("Register a custom identity (cosh-style example)")
     print("=" * 60)
     import cmath
+
     from eml.ast import Eml, One, Var
 
     # An extra alias so the forward translator can see a new name.

@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+# Bumped from >=68: PEP 639 SPDX license expressions need setuptools >= 77.
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,9 +9,14 @@ version = "0.1.0"
 description = "A translator library between standard mathematical expressions and EML (Exp-Minus-Log), the universal primitive for elementary mathematics."
 readme = "README.md"
 requires-python = ">=3.9"
-license = { file = "LICENSE" }
+
+# PEP 639. setuptools >= 77 deprecates the `{ file = "LICENSE" }` table form and
+# the `License :: OSI Approved ::` classifier, and errors when both are present.
+license = "MIT"
+license-files = ["LICENSE"]
+
 authors = [
-    { name = "ElMatiOfficial" },
+    { name = "Juan Sebastian Mateus Perdomo" },
 ]
 keywords = [
     "mathematics",
@@ -25,15 +31,16 @@ keywords = [
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Mathematics",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
 ]
 dependencies = [
     "sympy>=1.12",
@@ -43,6 +50,7 @@ dependencies = [
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
+    "ruff>=0.6",
 ]
 
 [project.scripts]
@@ -52,11 +60,61 @@ eml = "eml.cli:main"
 Homepage = "https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI"
 Repository = "https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI"
 Issues = "https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI/issues"
+Changelog = "https://github.com/ElMatiOfficial/EML-Matemathical-Translator-for-AI/blob/main/CHANGELOG.md"
 Paper = "https://arxiv.org/abs/2603.21852"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
+# Ships the PEP 561 marker, so the `Typing :: Typed` classifier is true for
+# installed consumers and not only for whoever reads the source.
+[tool.setuptools.package-data]
+eml = ["py.typed"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+addopts = "--strict-markers"
+
+# ---------------------------------------------------------------------------
+# Ruff. Deliberately a small rule set to start — a linter that shows 400 errors
+# on day one is a linter you disable. Widen `select` later.
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes — real bugs: unused imports, undefined names
+    "W",    # pycodestyle warnings
+    "I",    # isort — import ordering
+    "UP",   # pyupgrade — modern syntax for the Python floor
+]
+ignore = [
+    "E501",  # line length is enforced by the formatter, not the linter
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["F401"]
+"examples/**" = ["F401", "E402"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["eml"]
+
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["src/eml"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]

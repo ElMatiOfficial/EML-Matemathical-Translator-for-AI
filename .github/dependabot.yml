@@ -1,0 +1,23 @@
+version: 2
+updates:
+  # Keep Actions pinned versions current. This is the one that matters most —
+  # stale third-party actions are a real supply-chain risk.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "deps"
+    groups:
+      python-deps:
+        patterns: ["*"]

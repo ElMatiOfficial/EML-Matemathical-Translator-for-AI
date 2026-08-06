@@ -33,9 +33,7 @@ def test_zero_identity():
     assert abs(complex(v)) < 1e-12
 
 
-@pytest.mark.parametrize(
-    "x,y", [(3.0, 1.5), (1.7, 0.6), (5.0, 2.0), (1.0, 0.8)]
-)
+@pytest.mark.parametrize("x,y", [(3.0, 1.5), (1.7, 0.6), (5.0, 2.0), (1.0, 0.8)])
 def test_sub_identity(x, y):
     tree = IDENTITIES["sub"](Var("x"), Var("y"))
     assert evaluate(tree, {"x": x, "y": y}) == pytest.approx(x - y)
@@ -44,7 +42,7 @@ def test_sub_identity(x, y):
 def test_register_and_reject_bogus_identity():
     # an identity that *claims* to compute cos(x) but actually computes exp(x)
     # should be rejected by verify_identity
-    from eml.ast import Eml, One
+    from eml.ast import Eml
 
     def fake_cos(x):
         return Eml(x, One())  # this is exp, not cos
