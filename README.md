@@ -63,6 +63,25 @@ between the literal `1`, a variable, or `eml(·, ·)`. This:
 - and exposes the *Kolmogorov length* (RPN token count) of each identity
   as an intrinsic complexity score.
 
+### What happened when I actually tested that
+
+I wired these operations into Claude as seven tool-use tools and benchmarked
+whether having them made the agent better at mathematics. The result was
+mostly negative, and it is the most useful thing I know about this library:
+
+> The agents reach 100% on every task tried, but on calculus, algebra, and
+> analytic work they route through a `sympy` escape hatch and largely **ignore
+> the EML tools**. EML pays its rent only on translate / evaluate / verify
+> problems — the ones where the paper's K ≤ 11 identities live.
+
+That is the honest shape of the tool's usefulness. The reason is mechanical
+rather than mysterious: multiplication's EML tree has K=41, `sin`/`cos` exceed
+K=100, and π is K=193, so for anything past the registered identities a pure-EML
+route is impractical and a competent agent correctly declines to take it.
+
+Treat this library as an exact translator and a complexity metric, not as a
+reasoning substrate that will make a model better at calculus.
+
 ---
 
 ## Installation
