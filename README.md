@@ -1,9 +1,11 @@
 # EML Translator
 
 [![CI](https://github.com/ElMatiOfficial/EML-Mathematical-Translator-for-AI/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ElMatiOfficial/EML-Mathematical-Translator-for-AI/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/eml-translator.svg)](https://pypi.org/project/eml-translator/)
-[![Python versions](https://img.shields.io/pypi/pyversions/eml-translator.svg)](https://pypi.org/project/eml-translator/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+> Not on PyPI yet — install from source, see [Installation](#installation).
+> The release workflow is wired and waiting on a trusted publisher.
 
 A Python library that translates between standard mathematical expressions and
 **EML** (Exp-Minus-Log) trees — the universal reduction primitive for
